@@ -1,0 +1,147 @@
+
+:- set_prolog_flag(encoding, utf8).
+
+% Predicado principal para determinar la dieta adecuada
+dieta(Dieta) :-
+    preguntar_respuestas(Respuestas),
+    evaluar_dieta(Dieta, Respuestas),
+    menu(Dieta, Menu),
+    write('Menu recomendado para '), write(Dieta), write(':'), nl,
+    write(Menu), nl.
+
+% Predicado para hacer todas las preguntas y almacenar las respuestas
+preguntar_respuestas([R1, R2, R3, R4, R5, R6, IMC]) :-
+    pregunta(tienes, diabetes, R1),
+    pregunta(tienes, hipertension, R2),
+    pregunta(tienes, alguna_enfermedad_cardiovascular, R3),
+    pregunta(consumes, alcohol, R4),
+    pregunta(tienes, algun_tratamiento_actualmente, R5),
+    pregunta(has, sido_operado_recientemente, R6),
+    pregunta(cual, es_tu_imc, IMC).
+
+% Predicado para hacer preguntas y obtener respuestas
+pregunta(Pregunta, Elemento, Respuesta) :-
+    format('~w ~w? (si/no): ', [Pregunta, Elemento]),
+    read(Respuesta).
+
+pregunta(Pregunta, Elemento, Respuesta) :-
+    format('~w ~w: ', [Pregunta, Elemento]),
+    read(Respuesta).
+
+% Predicado para evaluar las dietas en función de las respuestas
+evaluar_dieta(dieta_para_subir_peso, [_, _, _, _, _, _, IMC]) :-  
+    IMC < 18.5.
+
+evaluar_dieta(dieta_equilibrada, [R1, R2, R3, R4, R5, R6, IMC]) :- 
+    not(positivo(R1)),
+    not(positivo(R2)),
+    not(positivo(R3)),
+    not(positivo(R4)),
+    not(positivo(R5)),
+    not(positivo(R6)),
+    IMC >= 18.5,
+    IMC < 25.
+
+evaluar_dieta(dieta_para_bajar_peso, [_, _, _, _, _, _, IMC]) :-  
+    IMC >= 25.
+
+evaluar_dieta(dieta_hipoglucidica, [_, R2, R3, R4, R5, R6, _]) :-  
+    not(positivo(R2)),
+    not(positivo(R3)),
+    not(positivo(R4)),
+    not(positivo(R5)),
+    not(positivo(R6)).
+
+evaluar_dieta(dieta_hipograsa, [R1, R2, R3, R4, R5, R6, _]) :- 
+    not(positivo(R1)),
+    not(positivo(R2)),
+    positivo(R3),
+    not(positivo(R4)),
+    not(positivo(R5)),
+    not(positivo(R6)).
+
+evaluar_dieta(dieta_hiposodica, [R1, R2, R3, R4, R5, R6, _]) :-  
+    not(positivo(R1)),
+    positivo(R2),
+    not(positivo(R3)),
+    not(positivo(R4)),
+    not(positivo(R5)),
+    not(positivo(R6)).
+
+evaluar_dieta(dieta_blanda, [R1, R2, R3, R4, R5, R6, _]) :- 
+    not(positivo(R1)),
+    not(positivo(R2)),
+    not(positivo(R3)),
+    not(positivo(R4)),
+    not(positivo(R5)),
+    positivo(R6).
+
+% Definición de menús para cada tipo de dieta
+menu(dieta_para_subir_peso, Menu) :-
+    Menu = 'Lunes:\n\tDesayuno: Avena con leche entera, frutos secos y miel, un batido de proteínas.\n\tAlmuerzo: Pollo a la plancha con arroz integral y aguacate, ensalada de espinacas con aceite de oliva.\n\tMerienda: Yogur con frutas y granola.\n\tCena: Salmón a la parrilla con quinoa y verduras asadas.\n\n
+    Martes:\n\tDesayuno: Batido de plátano con leche entera y mantequilla de maní.\n\tAlmuerzo: Ensalada de atún con espinacas, huevo duro y aguacate.\n\tMerienda: Pan integral con mantequilla de almendras.\n\tCena: Filete de ternera con patatas asadas y brócoli.\n\n
+    Miércoles:\n\tDesayuno: Smoothie de frutas con yogur griego y avena.\n\tAlmuerzo: Pollo al curry con arroz integral y verduras.\n\tMerienda: Frutos secos y una manzana.\n\tCena: Pechuga de pavo con quinoa y ensalada verde.\n\n
+    Jueves:\n\tDesayuno: Tostadas con aguacate y huevo, un batido de proteínas.\n\tAlmuerzo: Ensalada de quinoa con garbanzos y verduras asadas.\n\tMerienda: Yogur con frutas y miel.\n\tCena: Pescado al horno con patatas y espárragos.\n\n
+    Viernes:\n\tDesayuno: Pan integral con mantequilla de maní y plátano.\n\tAlmuerzo: Ensalada de pollo con espinacas, nueces y aderezo de yogur.\n\tMerienda: Frutas frescas con queso cottage.\n\tCena: Hamburguesa de lentejas con ensalada verde.\n\n
+    Sábado:\n\tDesayuno: Batido de frutas con leche entera y avena.\n\tAlmuerzo: Ensalada de atún con espinacas y maíz.\n\tMerienda: Hummus con palitos de zanahoria.\n\tCena: Pollo asado con quinoa y verduras al vapor.\n\n
+    Domingo:\n\tDesayuno: Tostadas integrales con aguacate y tomate.\n\tAlmuerzo: Ensalada de pollo con espinacas y pimientos.\n\tMerienda: Frutas frescas.\n\tCena: Pavo al horno con patatas y espárragos.'.
+
+menu(dieta_para_bajar_peso, Menu) :-
+    Menu = 'Lunes:\n\tDesayuno: Batido verde de espinacas, manzana y jengibre, té verde.\n\tAlmuerzo: Ensalada de pollo con espinacas, tomate y aguacate, aderezo de limón.\n\tMerienda: Manzana con mantequilla de almendras.\n\tCena: Filete de pescado a la parrilla con brócoli y zanahorias.\n\n
+    Martes:\n\tDesayuno: Yogur griego con fresas y semillas de chía.\n\tAlmuerzo: Sopa de verduras con pollo desmenuzado.\n\tMerienda: Rodajas de pepino con hummus.\n\tCena: Pollo al vapor con ensalada de espinacas y tomates cherry.\n\n
+    Miércoles:\n\tDesayuno: Avena cocida con leche de almendras y arándanos.\n\tAlmuerzo: Ensalada de quinoa con verduras asadas.\n\tMerienda: Frutos secos.\n\tCena: Salmón al horno con espárragos y una ensalada verde.\n\n
+    Jueves:\n\tDesayuno: Smoothie de plátano y espinacas con leche de almendras.\n\tAlmuerzo: Ensalada de atún con espinacas y aguacate.\n\tMerienda: Palitos de zanahoria con hummus.\n\tCena: Pechuga de pollo a la parrilla con espinacas salteadas.\n\n
+    Viernes:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Sopa de lentejas con zanahorias y espinacas.\n\tMerienda: Frutas frescas.\n\tCena: Pollo al curry con coliflor y espinacas.\n\n
+    Sábado:\n\tDesayuno: Batido de frutas con yogur griego y avena.\n\tAlmuerzo: Ensalada de quinoa con garbanzos y verduras.\n\tMerienda: Almendras y una manzana.\n\tCena: Pollo asado con espinacas al vapor.\n\n
+    Domingo:\n\tDesayuno: Yogur con nueces y miel.\n\tAlmuerzo: Pollo al horno con arroz integral y ensalada verde.\n\tMerienda: Frutas frescas.\n\tCena: Filete de salmón con brócoli al vapor.'.
+
+menu(dieta_equilibrada, Menu) :-
+    Menu = 'Lunes:\n\tDesayuno: Tostadas integrales con aguacate y huevo, café sin azúcar.\n\tAlmuerzo: Ensalada de pollo con espinacas, tomate y aguacate.\n\tMerienda: Yogur con frutas.\n\tCena: Filete de pescado a la parrilla con brócoli y zanahorias.\n\n
+    Martes:\n\tDesayuno: Avena cocida con leche de almendras y frutas frescas.\n\tAlmuerzo: Sopa de verduras con pollo desmenuzado.\n\tMerienda: Frutas frescas.\n\tCena: Pechuga de pollo con espinacas salteadas y quinoa.\n\n
+    Miércoles:\n\tDesayuno: Smoothie de plátano y espinacas con leche de almendras.\n\tAlmuerzo: Ensalada de atún con espinacas y aguacate.\n\tMerienda: Frutos secos.\n\tCena: Salmón al horno con espárragos y una ensalada verde.\n\n
+    Jueves:\n\tDesayuno: Yogur griego con fresas y semillas de chía.\n\tAlmuerzo: Ensalada de quinoa con verduras asadas.\n\tMerienda: Hummus con palitos de zanahoria.\n\tCena: Pollo al vapor con ensalada de espinacas y tomates cherry.\n\n
+    Viernes:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Sopa de lentejas con zanahorias y espinacas.\n\tMerienda: Frutas frescas.\n\tCena: Pollo al curry con coliflor y espinacas.\n\n
+    Sábado:\n\tDesayuno: Batido de frutas con yogur griego y avena.\n\tAlmuerzo: Ensalada de quinoa con garbanzos y verduras.\n\tMerienda: Almendras y una manzana.\n\tCena: Pollo asado con espinacas al vapor.\n\n
+    Domingo:\n\tDesayuno: Yogur con nueces y miel.\n\tAlmuerzo: Pollo al horno con arroz integral y ensalada verde.\n\tMerienda: Frutas frescas.\n\tCena: Filete de salmón con brócoli al vapor.'.
+
+menu(dieta_hipoglucidica, Menu) :-
+    Menu = 'Lunes:\n\tDesayuno: Huevos revueltos con espinacas y queso.\n\tAlmuerzo: Pollo a la parrilla con brócoli y ensalada verde.\n\tMerienda: Frutos secos.\n\tCena: Pescado al horno con espárragos y col rizada.\n\n
+    Martes:\n\tDesayuno: Yogur griego con nueces y semillas de chía.\n\tAlmuerzo: Ensalada de atún con espinacas y aguacate.\n\tMerienda: Rodajas de pepino con hummus.\n\tCena: Filete de ternera con coliflor al vapor.\n\n
+    Miércoles:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Sopa de lentejas con espinacas.\n\tMerienda: Frutas frescas.\n\tCena: Pollo al curry con col rizada.\n\n
+    Jueves:\n\tDesayuno: Smoothie de frutas con leche de almendras.\n\tAlmuerzo: Ensalada de pollo con espinacas y pimientos.\n\tMerienda: Palitos de zanahoria con hummus.\n\tCena: Salmón a la parrilla con espárragos.\n\n
+    Viernes:\n\tDesayuno: Avena cocida con leche de almendras y arándanos.\n\tAlmuerzo: Ensalada de quinoa con verduras asadas.\n\tMerienda: Frutas frescas.\n\tCena: Pollo al vapor con espinacas y brócoli.\n\n
+    Sábado:\n\tDesayuno: Batido de plátano y espinacas con leche de almendras.\n\tAlmuerzo: Ensalada de atún con espinacas y tomate.\n\tMerienda: Yogur griego con frutos secos.\n\tCena: Pavo al horno con patatas y ensalada verde.\n\n
+    Domingo:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Pollo al horno con arroz integral y ensalada verde.\n\tMerienda: Frutas frescas.\n\tCena: Filete de salmón con brócoli al vapor.'.
+
+menu(dieta_hipograsa, Menu) :-
+    Menu = 'Lunes:\n\tDesayuno: Avena cocida con leche de almendras y frutas frescas.\n\tAlmuerzo: Pollo a la parrilla con ensalada verde.\n\tMerienda: Frutas frescas.\n\tCena: Pescado al horno con espárragos y col rizada.\n\n
+    Martes:\n\tDesayuno: Yogur griego con nueces y semillas de chía.\n\tAlmuerzo: Ensalada de atún con espinacas y aguacate.\n\tMerienda: Rodajas de pepino con hummus.\n\tCena: Filete de ternera con coliflor al vapor.\n\n
+    Miércoles:\n\tDesayuno: Smoothie de frutas con leche de almendras.\n\tAlmuerzo: Sopa de lentejas con espinacas.\n\tMerienda: Frutos secos.\n\tCena: Pollo al curry con col rizada.\n\n
+    Jueves:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Ensalada de quinoa con verduras asadas.\n\tMerienda: Palitos de zanahoria con hummus.\n\tCena: Salmón a la parrilla con espárragos.\n\n
+    Viernes:\n\tDesayuno: Batido de plátano y espinacas con leche de almendras.\n\tAlmuerzo: Ensalada de pollo con espinacas y pimientos.\n\tMerienda: Yogur griego con frutos secos.\n\tCena: Pavo al horno con patatas y ensalada verde.\n\n
+    Sábado:\n\tDesayuno: Avena cocida con leche de almendras y arándanos.\n\tAlmuerzo: Ensalada de quinoa con garbanzos y verduras.\n\tMerienda: Frutas frescas.\n\tCena: Pollo al vapor con espinacas y brócoli.\n\n
+    Domingo:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Pollo al horno con arroz integral y ensalada verde.\n\tMerienda: Frutas frescas.\n\tCena: Filete de salmón con brócoli al vapor.'.
+
+menu(dieta_hiposodica, Menu) :-
+    Menu = 'Lunes:\n\tDesayuno: Avena cocida con leche de almendras y frutas frescas.\n\tAlmuerzo: Pollo a la parrilla con ensalada verde.\n\tMerienda: Frutas frescas.\n\tCena: Pescado al horno con espárragos y col rizada.\n\n
+    Martes:\n\tDesayuno: Yogur griego con nueces y semillas de chía.\n\tAlmuerzo: Ensalada de atún con espinacas y aguacate.\n\tMerienda: Rodajas de pepino con hummus.\n\tCena: Filete de ternera con coliflor al vapor.\n\n
+    Miércoles:\n\tDesayuno: Smoothie de frutas con leche de almendras.\n\tAlmuerzo: Sopa de lentejas con espinacas.\n\tMerienda: Frutos secos.\n\tCena: Pollo al curry con col rizada.\n\n
+    Jueves:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Ensalada de quinoa con verduras asadas.\n\tMerienda: Palitos de zanahoria con hummus.\n\tCena: Salmón a la parrilla con espárragos.\n\n
+    Viernes:\n\tDesayuno: Batido de plátano y espinacas con leche de almendras.\n\tAlmuerzo: Ensalada de pollo con espinacas y pimientos.\n\tMerienda: Yogur griego con frutos secos.\n\tCena: Pavo al horno con patatas y ensalada verde.\n\n
+    Sábado:\n\tDesayuno: Avena cocida con leche de almendras y arándanos.\n\tAlmuerzo: Ensalada de quinoa con garbanzos y verduras.\n\tMerienda: Frutas frescas.\n\tCena: Pollo al vapor con espinacas y brócoli.\n\n
+    Domingo:\n\tDesayuno: Tostadas integrales con aguacate y huevo.\n\tAlmuerzo: Pollo al horno con arroz integral y ensalada verde.\n\tMerienda: Frutas frescas.\n\tCena: Filete de salmón con brócoli al vapor.'.
+
+menu(dieta_blanda, Menu) :-
+    Menu = 'Lunes:\n\tDesayuno: Avena cocida con leche de almendras y puré de manzana.\n\tAlmuerzo: Pechuga de pollo al vapor con puré de patatas.\n\tMerienda: Yogur natural sin azúcar.\n\tCena: Pescado al horno con puré de zanahoria.\n\n
+    Martes:\n\tDesayuno: Tostadas integrales con mantequilla de almendra.\n\tAlmuerzo: Sopa de pollo con fideos y zanahorias.\n\tMerienda: Compota de manzana.\n\tCena: Pollo a la parrilla con puré de calabaza.\n\n
+    Miércoles:\n\tDesayuno: Smoothie de plátano con leche de almendras.\n\tAlmuerzo: Ensalada de atún con espinacas y puré de patatas.\n\tMerienda: Galletas de avena caseras.\n\tCena: Pollo al horno con puré de calabacín.\n\n
+    Jueves:\n\tDesayuno: Yogur natural con miel.\n\tAlmuerzo: Sopa de verduras con pollo desmenuzado.\n\tMerienda: Frutas en puré.\n\tCena: Salmón al vapor con puré de patatas.\n\n
+    Viernes:\n\tDesayuno: Avena cocida con leche de almendras y miel.\n\tAlmuerzo: Pollo a la parrilla con puré de calabaza.\n\tMerienda: Compota de manzana.\n\tCena: Pescado al horno con puré de zanahoria.\n\n
+    Sábado:\n\tDesayuno: Tostadas integrales con puré de plátano.\n\tAlmuerzo: Sopa de pollo con fideos y zanahorias.\n\tMerienda: Yogur natural sin azúcar.\n\tCena: Pollo a la parrilla con puré de calabacín.\n\n
+    Domingo:\n\tDesayuno: Smoothie de plátano con leche de almendras.\n\tAlmuerzo: Ensalada de atún con espinacas y puré de patatas.\n\tMerienda: Galletas de avena caseras.\n\tCena: Pollo al horno con puré de calabaza.'.
+
+pregunta(X,Y,R):- write(X),write(' '),write(Y),write('  ? '),read(R),nl.
+
+ positivo('SI').
+ positivo('si').
+ positivo('Si').
